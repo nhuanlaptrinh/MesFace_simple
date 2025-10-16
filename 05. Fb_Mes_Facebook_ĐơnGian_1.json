@@ -1,0 +1,278 @@
+{
+  "name": "05. Fb_Mes_Facebook_ĐơnGian_1",
+  "nodes": [
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "inanduchuy3012mmmmmmm",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        464
+      ],
+      "id": "67d06beb-d3e5-4c40-b819-89f210ae64aa",
+      "name": "Webhook",
+      "webhookId": "ef9cdeb8-de6b-4c33-9bc0-ef5d3c004a20"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        272
+      ],
+      "id": "f0dbe37d-d2d1-4beb-bd11-1d625693b698",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=#Vai trò và phạm vi chung\nBạn là nhân viên A.I tư vấn bán hàng chuyên nghiệp \n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        832,
+        464
+      ],
+      "id": "a68a2adb-27aa-4d65-8f67-32b2b1e323a8",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        704
+      ],
+      "id": "cf1d3de2-8c49-4f56-b909-d8dec62a415b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Ed8Jh9kqfVkHaB9Y",
+          "name": "OpenAi account 25_API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let data = $input.first().json.output || '';\n\ndata = data.replace(/\\[([^\\]]+)\\]\\((https?:\\/\\/[^\\)]+)\\)/g, '$2');\n\n// Thoát các ký tự đặc biệt để đảm bảo JSON hợp lệ\ndata = data.replace(/\\\\/g, '\\\\\\\\'); // Thoát dấu \\\ndata = data.replace(/\"/g, '\\\\\"');   // Thoát dấu \"\ndata = data.replace(/\\n/g, '\\\\n');  // Thoát ký tự xuống dòng\nreturn {\n  data\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        464
+      ],
+      "id": "13118afe-2793-430b-b166-3e8a5dffc392",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "EVENT_RECEIVED",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        672
+      ],
+      "id": "e12acb85-ba89-4d54-a087-0f6d5e1b5c18",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5ce58185-b3cd-46ef-9241-1652912c8beb",
+              "name": "senderID",
+              "value": "={{ $json.body.entry[0].messaging[0].sender.id }}",
+              "type": "string"
+            },
+            {
+              "id": "2324a350-a471-41c3-8a48-17bf25c5719b",
+              "name": "text",
+              "value": "={{ $json.body.entry[0].messaging[0].message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "10ba858d-9218-4e06-bc8f-eed8d09f9f9c",
+              "name": "recipientID",
+              "value": "={{ $json.body.entry[0].messaging[0].recipient.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        464
+      ],
+      "id": "a9a5539d-2533-4737-b911-9eb4479b9b55",
+      "name": "User Information"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/me/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAAQHiK0ceBcBPr59ZABNCKp4sIpaCTJhe9iYyRaZA01w5ZATFBbMUfJiUr7tNQvEgIHPgJkCSLo9Jvhf4OZCcbFP5HcoZAdyZAfDMSvd9ZAanqZBa29PRJJkJkyaRL3GfZBJH4o82VskPDex3oG4a4Fpd8sBfZBsDzW7ua5SfLSjU1EkeKuatS06weCzZCQsfScuUg8NBseraB0jSXZA8FRRqRmJ"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"recipient\": {\n    \"id\": \"{{$('User Information').item.json.senderID}}\"\n  },\n  \"messaging_type\": \"RESPONSE\",\n  \"message\": {\n    \"text\": \"{{$json.data}}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        464
+      ],
+      "id": "7ecb5dd2-0a5f-4b80-b8b2-2877ed58ab8b",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.senderID }}",
+        "contextWindowLength": 100
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        848,
+        688
+      ],
+      "id": "4399b709-5b32-4e94-8dc8-e02f345e1b21",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "User Information",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "User Information": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5417a7a9-919a-4d3d-80d8-91781002c604",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "94a383c02457267bcc44878635a0fa02b7d3206c5479bfc8890faa812e2bbd97"
+  },
+  "id": "8t6HPyvgw8mO3VSs",
+  "tags": []
+}
